@@ -6,63 +6,137 @@ public class Game {
     public static void main(String[] args) {
         new Game();
     }
-    int totalMines = 99;
-    boolean color = false;
+
     boolean start = true;
     boolean gameOver = false;
+    int totalMines = 99;
+    int elapsedTime = 0;
 
-    int boardWidth = 720;
-    int boardHeight = 600;
+    final int rows = 20;
+    final int cols = 24;
+    final int tileSize = 30;
 
     JFrame frame = new JFrame("MineSweeper");
-    JPanel board = new JPanel();
-    JButton[][] grid = new JButton[20][24];
+    JPanel timerPanel = new JPanel();
+    JPanel explanationPanel = new JPanel();
+    JPanel boardPanel = new JPanel();
+
+    JButton[][] tiles = new JButton[rows][cols];
+    Grid[][] grid = new Grid[rows][cols];
+    Timer gameTimer;
+    JLabel timerLabel = new JLabel("Time: 0 seconds");
 
     Game() {
-        board.setLayout(new GridLayout(20, 24));
-        frame.setVisible(true);
-        frame.setSize(boardWidth, boardHeight);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
-        frame.add(board, BorderLayout.CENTER);
-        
-        for (int i = 0; i < grid.length; i++) {
+        // ===== Timer Panel =====
+        timerPanel.setBackground(Color.lightGray);
+        timerPanel.setPreferredSize(new Dimension(cols * tileSize, 50));
+        timerLabel.setFont(new Font("Arial", Font.BOLD, 40));
+        timerLabel.setForeground(Color.white);
+        timerPanel.add(timerLabel);
 
-            for (int j = 0; j < grid[i].length; j++) {
+        // ===== Explanation Panel =====
+        explanationPanel.setBackground(Color.lightGray);
+        explanationPanel.setPreferredSize(new Dimension(cols * tileSize, 150));
+        JLabel explanationLabel = new JLabel("Click on a tile to start the game!");
+        explanationLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        explanationLabel.setForeground(Color.white);
+        explanationPanel.add(explanationLabel);
 
+        // ===== Game Grid Setup =====
+        boardPanel.setLayout(new GridLayout(rows, cols));
+
+        // Initialize grid logic cells
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                grid[i][j] = new Grid();
+            }
+        }
+
+        // Initialize tiles (buttons)
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 JButton tile = new JButton();
-                grid[i][j] = tile;
-                board.add(tile);
-                tile.setFont(new Font("Arial", Font.BOLD, 20));
+                tiles[i][j] = tile;
 
-                if((i+j) % 2 == 0) {
-                    grid[i][j].setBackground(new Color(76, 175, 80));
-                } 
-                else {
-                    grid[i][j].setBackground(new Color(167, 216, 161));
+                tile.setFont(new Font("Arial", Font.BOLD, 16));
+                tile.setMargin(new Insets(0, 0, 0, 0));
+                tile.setFocusPainted(false);
+                tile.setBorder(BorderFactory.createLineBorder(new Color(60, 120, 60), 1));
+                tile.setContentAreaFilled(true);
+                tile.setOpaque(true);
+
+                // Alternate tile background color
+                if ((i + j) % 2 == 0) {
+                    tile.setBackground(new Color(76, 175, 80));
+                } else {
+                    tile.setBackground(new Color(167, 216, 161));
                 }
 
-                grid[i][j].setForeground(Color.white);
-                tile.addActionListener(new ActionListener() {
-                    
-                    public void actionPerformed(ActionEvent e) {
-                        JButton tile = (JButton) e.getSource();
-                        if (start) {
-                            start = false;
-                            while(totalMines > 0) {
-                                int x = (int) (Math.random() * 20);
-                                int y = (int) (Math.random() * 24);
-                                // if (grid[x][y].isMine()){
+                tile.setForeground(Color.WHITE);
+                boardPanel.add(tile);
 
-                                // }
+                final int row = i;
+                final int col = j;
+
+                tile.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        if (SwingUtilities.isLeftMouseButton(e)) {
+                            if (start) {
+                                start = false;
+                                placeMines(row, col);
+                                gameTimer.start();
                             }
+
+                            //handleLeftClick(row, col);
                         }
+                        // Optional: add right-click flag logic here
                     }
                 });
             }
+        }
 
+        // ===== Timer Logic =====
+        gameTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!gameOver) {
+                    elapsedTime++;
+                    timerLabel.setText("Time: " + elapsedTime + " seconds");
+                }
+            }
+        });
+
+        // ===== Frame Setup =====
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+
+        frame.add(timerPanel, BorderLayout.NORTH);
+        frame.add(boardPanel, BorderLayout.CENTER);
+        frame.add(explanationPanel, BorderLayout.SOUTH);
+
+        frame.setSize(cols * tileSize, rows * tileSize + 200); // Automatically size to fit components
+        frame.setLocationRelativeTo(null); // Center on screen
+        frame.setResizable(false);
+        frame.setVisible(true); // FINAL step (prevents squished layout)
+    }
+
+    // ===== Place Mines After First Click =====
+    private void placeMines(int startRow, int startCol) {
+        int minesPlaced = 0;
+
+        while (minesPlaced < totalMines) {
+            int x = (int) (Math.random() * rows);
+            int y = (int) (Math.random() * cols);
+
+            // Skip first clicked tile and already mined ones
+            if ((x == startRow && y == startCol) || grid[x][y].isMine()) {
+                continue;
+            }
+
+            grid[x][y].setMine(true);
+            tiles[x][y].setBackground(Color.RED); // For testing purposes, show where mines are placed
+            minesPlaced++;
         }
     }
 }
-
