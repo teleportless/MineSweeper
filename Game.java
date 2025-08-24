@@ -12,7 +12,7 @@ public class Game {
     int totalMines = 99;
     int elapsedTime = 0;
 
-    final int rows = 20;
+    final int rows  = 20;
     final int cols = 24;
     final int tileSize = 30;
 
@@ -49,6 +49,8 @@ public class Game {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 grid[i][j] = new Grid();
+                grid[i][j].setX(i);
+                grid[i][j].setY(j);
             }
         }
 
@@ -137,6 +139,75 @@ public class Game {
             grid[x][y].setMine(true);
             tiles[x][y].setBackground(Color.RED); // For testing purposes, show where mines are placed
             minesPlaced++;
+            
+            int iMin = grid[x][y].getX()-1;
+            int iMax = grid[x][y].getX()+1;
+            int jMin = grid[x][y].getY()-1;
+            int jMax = grid[x][y].getY()+1;
+            if (iMin < 0) iMin = 0;
+            if (iMax >= rows) iMax = rows;
+            if (jMin < 0) jMin = 0;
+            if (jMax >= cols) jMax = cols;
+            for (int i = iMin; i < iMax; i++) {
+                for (int j = jMin; j < jMax; j++) {
+                     grid[i][j].setNearbyMines(grid[i][j].getNearbyMines() + 1);
+                    
+                }
+            }
+            
+    }
+
+    
+    //Method checks if the user loses
+
+    private void lose(){
+    boolean lose = false;
+
+    for(int i = 0; i < rows; i++){
+        for(int j = 0; j < cols; j++){
+            if(grid[i][j].isMine() && grid[i][j].isRevealed()){
+                lose = true;
+                if(true){
+                    for(int r = 0; r < rows; r++){
+                        for(int c = 0; c < cols; c++){
+                            if(grid[r][c].isMine()){
+                              tiles[r][c].setBackground(Color.RED); // Show all mines
+                            }
+                        }
+                    }
+                
+                }
+                
+                
+            }
         }
     }
+
+}
+
+    //Method checks if the user wins
+    
+    private boolean win(){
+    for(int i = 0; i < rows; i++){
+        for(j = 0; j < cols; j++){
+            if(!grid[i][j].isMine() && !grid[i][j].isRevealed()){
+                return false;;
+            }
+
+            
+        }
+    }
+    return true; 
+
+
+
+
+}
+
+
+
+
+
+
+
 }
