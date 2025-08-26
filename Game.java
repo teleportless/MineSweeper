@@ -49,8 +49,6 @@ public class Game {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 grid[i][j] = new Grid();
-                grid[i][j].setX(i);
-                grid[i][j].setY(j);
             }
         }
 
@@ -89,10 +87,21 @@ public class Game {
                                 placeMines(row, col);
                                 gameTimer.start();
                             }
-
+                            removeTile(row, col);
                             //handleLeftClick(row, col);
                         }
                         // Optional: add right-click flag logic here
+                        if (SwingUtilities.isRightMouseButton(e)){
+                            grid[row][col].setFlagged();
+                            tiles[row][col].setBackground(Color.BLUE);
+                            if (grid[row][col].isFlagged()) {
+                                if ((row + col) % 2 == 0) {
+                                    tiles[row][col].setBackground(new Color(76, 175, 80));
+                                } else {
+                                    tiles[row][col].setBackground(new Color(167, 216, 161));
+                                }
+                            }
+                        }
                     }
                 });
             }
@@ -130,32 +139,46 @@ public class Game {
         while (minesPlaced < totalMines) {
             int x = (int) (Math.random() * rows);
             int y = (int) (Math.random() * cols);
-
+            
+            
             // Skip first clicked tile and already mined ones
-            if ((x == startRow && y == startCol) || grid[x][y].isMine()) {
-                continue;
-            }
-
+            if (!(x == startRow && y == startCol) && !grid[x][y].isMine()) {
             grid[x][y].setMine(true);
             tiles[x][y].setBackground(Color.RED); // For testing purposes, show where mines are placed
             minesPlaced++;
-            
-            int iMin = grid[x][y].getX()-1;
-            int iMax = grid[x][y].getX()+1;
-            int jMin = grid[x][y].getY()-1;
-            int jMax = grid[x][y].getY()+1;
-            if (iMin < 0) iMin = 0;
-            if (iMax >= rows) iMax = rows;
-            if (jMin < 0) jMin = 0;
-            if (jMax >= cols) jMax = cols;
-            for (int i = iMin; i < iMax; i++) {
-                for (int j = jMin; j < jMax; j++) {
-                     grid[i][j].setNearbyMines(grid[i][j].getNearbyMines() + 1);
-                    
+            int iMin = x - 1;
+            int iMax = x + 1;
+            int jMin = y - 1;
+            int jMax = y + 1;
+            if (iMin < 0) {
+                    iMin = 0;
+                }
+            if (iMax >= rows) {
+                    iMax = rows - 1;
+                }
+            if (jMin < 0) {
+                    jMin = 0;
+                }
+            if (jMax >= cols) {
+                    jMax = cols - 1;
+                }
+            for (int i = iMin; i <= iMax; i++) {
+                for (int j = jMin; j <= jMax; j++) {
+                    grid[i][j].setNearbyMines(grid[i][j].getNearbyMines() + 1);
+                    tiles[i][j].setText(Integer.toString(grid[i][j].getNearbyMines()));
                 }
             }
-            
+            for (int i = 0; i < rows; i++) {
+                for(int j = 0; j < cols; j++){
+                    if (grid[i][j].isMine()) {
+                        grid[i][j].setNearbyMines(-1);
+                        tiles[i][j].setText("M");
+                    }
+                }
+            }
+        }
     }
+}
 
     
     //Method checks if the user loses
@@ -189,20 +212,49 @@ public class Game {
     
     private boolean win(){
     for(int i = 0; i < rows; i++){
-        for(j = 0; j < cols; j++){
+        for(int j = 0; j < cols; j++){
             if(!grid[i][j].isMine() && !grid[i][j].isRevealed()){
-                return false;;
+                return false;
             }
 
             
         }
     }
-    return true; 
-
-
-
-
+    return true;
 }
+    private void removeTile(int x, int y){
+        if(grid[x][y].isMine()){
+            gameTimer.stop();
+            gameOver = true;
+        } else {
+            grid[x][y].setRevealed(true);
+            tiles[x][y].setBackground(Color.GRAY);
+            tiles[x][y].setEnabled(false);
+            int iMin = x - 1;
+            int iMax = x + 1;
+            int jMin = y - 1;
+            int jMax = y + 1;
+            if (iMin < 0) {
+                    iMin = 0;
+                }
+            if (iMax >= rows) {
+                    iMax = rows - 1;
+                }
+            if (jMin < 0) {
+                    jMin = 0;
+                }
+            if (jMax >= cols) {
+                    jMax = cols - 1;
+                }
+            for (int i = iMin; i <= iMax; i++) {
+                for (int j = jMin; j <= jMax; j++) {
+                    if(grid[i][j].isRevealed() == false && !(i == x && j == y) && grid[x][y].getNearbyMines() == 0){
+                        removeTile(i, j);
+                    }
+                }
+            }
+        }
+    }
 
 
 
