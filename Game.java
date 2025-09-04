@@ -5,10 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Game {
-    public static void main(String[] args) {
-        new Game();
-    }
-
     boolean start = true;
     boolean gameOver = false;
     int totalMines = 99;
@@ -29,8 +25,8 @@ public class Game {
     
     Timer gameTimer;
     JLabel timerLabel = new JLabel("Time: 0 seconds");
-
     Game() {
+
         // ===== Timer Panel =====
         timerPanel.setBackground(Color.lightGray);
         timerPanel.setPreferredSize(new Dimension(cols * tileSize, 50));
@@ -106,7 +102,6 @@ public class Game {
                 } else {
                     tile.setColor(new Color(167, 216, 161));
                 }
-                tile.setOriginalColor();
 
                 boardPanel.add(tile);
 
@@ -117,7 +112,7 @@ public class Game {
                     @Override
                     public void mousePressed(MouseEvent e) {
                         if (SwingUtilities.isLeftMouseButton(e) && !e.isControlDown()) {
-                            if (start) {
+                            if (start && !grid[row][col].isFlagged()) {
                                 start = false;
                                 placeMines(row, col);
                                 gameTimer.start();
@@ -154,9 +149,7 @@ public class Game {
                                 grid[row][col].setFlagged();
                                 totalFlags++;
                             }
-                            
                         }
-                        
                         }
                     }
                 });
@@ -220,7 +213,7 @@ public class Game {
                         grid[i][j].setForeground(Color.BLUE);
                         break;
                     case 2:
-                        grid[i][j].setForeground(new Color(0, 128, 0)); // Dark Green
+                        grid[i][j].setForeground(new Color(0, 105, 0)); // Dark Green
                         break;
                     case 3:
                         grid[i][j].setForeground(Color.RED);
@@ -283,7 +276,7 @@ public class Game {
     }
     return true;
 }
-    private void removeTile(int x, int y){
+    public void removeTile(int x, int y){
         if(grid[x][y].isMine()){
             gameTimer.stop();
             gameOver = true;
