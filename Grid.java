@@ -10,6 +10,9 @@ public class Grid extends JButton{
     private boolean isMine = false;
     private Color originalColor;
 
+    //Attributes for Computer
+    private int localMines;
+
     //Getters
     public int getNearbyMines() {
         return nearbyMines;
@@ -22,6 +25,9 @@ public class Grid extends JButton{
     }
     public boolean isMine() {
         return isMine;
+    }
+    public int getLocalNearbyMines(){
+        return localMines;
     }
 
     //Setters
@@ -39,9 +45,13 @@ public class Grid extends JButton{
     }
     public void setColor(Color color){
         this.originalColor = color;
+        this.setBackground(this.originalColor);
     }
     public void setOriginalColor(){
         this.setBackground(this.originalColor);
+    }
+    public void setLocalNearbyMines(int localMines){
+        this.localMines = localMines;
     }
 
     public void reset() {
