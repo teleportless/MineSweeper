@@ -1,122 +1,147 @@
-import java.awt.*;
+import java.awt.Color;
 import java.util.*;
+import javax.swing.JButton;
 
-public class Computer extends Game {
+public class Grid extends JButton {
 
-    public void findBombs(){
-        for (int row = 0; row < 20; row++){
-            for(int col = 0; col < 24; col++){
-                if (grid[row][col].isRevealed()) {
-                    findBomb(row, col);
-                }
-            }
-        }
+    //Attributes
+    private int nearbyMines = 0;
+    private boolean isRevealed = false;
+    private boolean isFlagged = false;
+    private boolean isMine = false;
+    private Color originalColor;
+    private int x;
+    private int y;
+    private int probability = 0;
+    private boolean guessMines;
+
+    //Neighbors
+    private Grid North = null;
+    private Grid East = null;
+    private Grid NorthWest = null;
+    private Grid SouthEast = null;
+    private Grid NorthEast = null;
+    private Grid South = null;
+    private Grid West = null;
+    private Grid SouthWest = null;
+
+    //Getters
+    public Grid getSouth(){
+        return South;
     }
-    private void findBomb(int x, int y){
-        int iMin = Math.max(0, x - 1);
-        int iMax = Math.min(rows - 1, x + 1);
-        int jMin = Math.max(0, y - 1);
-        int jMax = Math.min(cols - 1, y + 1);
-        int unclearedTiles = 0;
-            for (int i = iMin; i <= iMax; i++) {
-                for (int j = jMin; j <= jMax; j++) {
-                    if (!grid[i][j].isRevealed()){
-                        unclearedTiles++;
-                    }
-                }
-            }
-            if (grid[x][y].getNearbyMines() == unclearedTiles){
-                for (int i = iMin; i <= iMax; i++) {
-                    for (int j = jMin; j <= jMax; j++) {
-                        if (!grid[i][j].isRevealed() && !grid[i][j].isFlagged()){
-                            grid[i][j].setFlagged();
-                            grid[i][j].setBackground(Color.BLUE);
-                            totalFlags--;
-                        }
-                    }
-                }
-                
-            }
+    public Grid getNorth(){
+        return North;
     }
-    public void clearTiles(){
-        for (int row = 0; row < 20; row++){
-            for(int col = 0; col < 24; col++){
-                if (grid[row][col].isRevealed()) {
-                    clearTile(row, col);
-                }
-            }
-        }
+    public Grid getEast(){
+        return East;
     }
-    private void clearTile(int x, int y){
-        int iMin = Math.max(0, x - 1);
-        int iMax = Math.min(rows - 1, x + 1);
-        int jMin = Math.max(0, y - 1);
-        int jMax = Math.min(cols - 1, y + 1);
-        int minesFlagged = 0;
-        int unclearedTiles = 0;
-        for (int i = iMin; i <= iMax; i++) {
-            for(int j = jMin; j <= jMax; j++) {
-                if (!grid[i][j].isRevealed()){
-                    unclearedTiles++;
-                }
-                if (grid[i][j].isFlagged()) {
-                    minesFlagged++;
-                }
-            }
-        }
-        if (minesFlagged == grid[x][y].getNearbyMines() && unclearedTiles > grid[x][y].getNearbyMines()) {
-            for (int i = iMin; i <= iMax; i++) {
-            for(int j = jMin; j <= jMax; j++) {
-                if (!grid[i][j].isRevealed() && !grid[i][j].isFlagged()){
-                    removeTile(i, j);
-                }
-            }
-        }
-        }
+    public Grid getNorthWest(){
+        return NorthWest;
     }
-    private void setTheories(){
-        for (int row = 0; row < 20; row++) {
-            for (int col = 0; col < 24; col++) {
-                
-            }
-        }
+    public Grid getSouthEast(){
+        return SouthEast;
     }
-    private void setTheory(int row, int col){
-        if (grid[row][col].isRevealed() && grid[row][col].getNearbyMines() != 0) {
-            boolean nextToRevealed = false;
-            boolean nextToUnrevealed = false;
-            ArrayList<Grid> possiblePair = new ArrayList<Grid>();
-            for (Grid directions : grid[row][col].getCardinalDirections()) {
-                if (directions != null) {
-                    if (directions.isRevealed() == false){
-                        nextToUnrevealed = true;
-                        break;
-                    }
-                }
-            }
-            if (nextToUnrevealed == false){
-                return;
-            }
-            for (Grid directions : grid[row][col].getCardinalDirections()) {
-                if (directions != null) {
-                    if (directions.isRevealed() && directions.getNearbyMines() != 0){
-                        nextToRevealed = true;
-                        possiblePair.add(directions);
-                    }
-                }
-            }
-            // possiblePair is now in scope here
-            for (int i = 0; i < possiblePair.size(); i++){
-                for (int j = 0; j < 8; j++) {
-                    if (grid[row][col].getCardinalDirections() != null) {
-                        if (grid[row][col].getCardinalDirections().get(j).isRevealed() == false){
-                            possiblePair.remove(i);
-                            i--;
-                        }
-                    }
-                }
-            }
-        
+    public Grid getNorthEast(){
+        return NorthEast;
     }
-}
+    public Grid getWest(){
+        return West;
+    }
+    public Grid getSouthWest(){
+        return SouthWest;
+    }
+    public List<Grid> getCardinalDirections(){
+        return Arrays.asList(this.South, this.North, this.East, this.West, this.NorthEast, this.SouthWest, this.NorthWest, this.SouthEast);
+    }
+    public int getNearbyMines() {
+        return nearbyMines;
+    }
+    public boolean isRevealed() {
+        return isRevealed;
+    }
+    public boolean isFlagged() {
+        return isFlagged;
+    }
+    public boolean isMine() {
+        return isMine;
+    }
+    public int getXCoord(){
+        return x;
+    }
+    public int getYCoord(){
+        return y;
+    }
+    public int getProbability(){
+        return this.probability;
+    }
+    public boolean getGuessMines(){
+        return this.guessMines;
+    }
+
+    //Setters
+    public void setNorth(Grid north){
+        this.North = north;
+    }
+    public void setEast(Grid east){
+        this.East = east;
+    }
+    public void setNorthWest(Grid northWest){
+        this.NorthWest = northWest;
+    }
+    public void setSouthEast(Grid SouthEast){
+        this.SouthEast = SouthEast;
+    }
+    public void setNorthEast(Grid NorthEast){
+        this.NorthEast = NorthEast;
+    }
+    public void setSouth(Grid south){
+        this.South = south;
+    }
+    public void setWest(Grid west){
+        this.West = west;
+    }
+    public void setSouthWest(Grid SouthWest){
+        this.SouthWest = SouthWest;
+    }
+    
+    public void setNearbyMines(int nearbyMines) {
+        this.nearbyMines = nearbyMines;
+    }
+    public void setRevealed() {
+        this.isRevealed = true;
+    }
+    public void setFlagged() {
+        this.isFlagged = !this.isFlagged;
+    }
+    public void setMine() {
+        this.isMine = true;
+    }
+    public void setColor(Color color){
+        this.originalColor = color;
+        this.setBackground(this.originalColor);
+    }
+    public void setOriginalColor(){
+        this.setBackground(this.originalColor);
+    }
+    public void setXCoord(int x){
+        this.x = x;
+    }
+    public void setYCoord(int y){
+        this.y = y;
+    }
+    public void setProbability(int probability){
+        this.probability = probability;
+    }
+    public void setGuessMines(){
+        this.guessMines = true;
+    }
+
+    
+
+    public void reset() {
+        this.nearbyMines = 0;
+        this.isRevealed = false;
+        this.isFlagged = false;
+        this.isMine = false;
+    }
 }
