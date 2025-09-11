@@ -10,6 +10,10 @@ public class Grid extends JButton {
     private boolean isFlagged = false;
     private boolean isMine = false;
     private Color originalColor;
+    private int x;
+    private int y;
+    private int probability = 0;
+    private boolean guessMines;
 
     //Neighbors
     private Grid North = null;
@@ -61,6 +65,18 @@ public class Grid extends JButton {
     public boolean isMine() {
         return isMine;
     }
+    public int getXCoord(){
+        return x;
+    }
+    public int getYCoord(){
+        return y;
+    }
+    public int getProbability(){
+        return this.probability;
+    }
+    public boolean getGuessMines(){
+        return this.guessMines;
+    }
 
     //Setters
     public void setNorth(Grid north){
@@ -107,6 +123,20 @@ public class Grid extends JButton {
     public void setOriginalColor(){
         this.setBackground(this.originalColor);
     }
+    public void setXCoord(int x){
+        this.x = x;
+    }
+    public void setYCoord(int y){
+        this.y = y;
+    }
+    public void setProbability(int probability){
+        this.probability = probability;
+    }
+    public void setGuessMines(){
+        this.guessMines = true;
+    }
+
+    
 
     public void reset() {
         this.nearbyMines = 0;
