@@ -7,13 +7,22 @@ import java.util.Arrays;
 public class Game {
     boolean start = true;
     boolean gameOver = false;
-    int totalMines = 99;
     double elapsedTime = 0;
-    int totalFlags = 99;
 
-    final int rows  = 20;
-    final int cols = 24;
+    // int totalMines = 99;
+    // int totalFlags = 99;
+
+    // final int rows  = 20;
+    // final int cols = 24;
+    
     final int tileSize = 30;
+    
+    int totalMines = 20;
+    int totalFlags = 20;
+
+    final int rows  = 10;
+    final int cols = 10;
+
 
     JFrame frame = new JFrame("MineSweeper");
     JPanel timerPanel = new JPanel();
@@ -41,10 +50,12 @@ public class Game {
         explanationLabel.setFont(new Font("Arial", Font.BOLD, 20));
         explanationLabel.setForeground(Color.white);
         explanationPanel.add(explanationLabel);
+
         // ===== Game Grid Setup =====
         explanationPanel.add(restartButton);
         restartButton.setFont(new Font("Arial", Font.BOLD, 20));
         restartButton.setVisible(false);
+
         restartButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -65,9 +76,9 @@ public class Game {
                         grid[i][j].setEnabled(true);
                         grid[i][j].setText("");
                         if ((i + j) % 2 == 0) {
-                            grid[i][j].setBackground(new Color(76, 175, 80));
+                            grid[i][j].setBackground(new Color(76, 175, 80)); //Slighty dark green
                         } else {
-                            grid[i][j].setBackground(new Color(167, 216, 161));
+                            grid[i][j].setBackground(new Color(167, 216, 161)); //Lighter green
                         }
                     }
                 }
@@ -89,6 +100,8 @@ public class Game {
                 Grid tile = new Grid();
                 grid[i][j] = tile;
 
+                tile.setXCoord(i);
+                tile.setYCoord(j);
                 tile.setFont(new Font("Arial", Font.BOLD, 16));
                 tile.setMargin(new Insets(0, 0, 0, 0));
                 tile.setFocusPainted(false);
@@ -98,9 +111,9 @@ public class Game {
 
                 // Alternate tile background color
                 if ((i + j) % 2 == 0) {
-                    tile.setColor(new Color(76, 175, 80));
+                    tile.setColor(new Color(76, 175, 80)); // Slightly dark green
                 } else {
-                    tile.setColor(new Color(167, 216, 161));
+                    tile.setColor(new Color(167, 216, 161)); // Lighter green
                 }
 
                 boardPanel.add(tile);
@@ -153,6 +166,40 @@ public class Game {
                         }
                     }
                 });
+            }
+        }
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (i-1 >= 0){
+                    grid[i][j].setNorth(grid[i-1][j]);
+                    if (j-1 >= 0) {
+                        grid[i][j].setNorthWest(grid[i-1][j-1]);
+                    }
+                    if (j+1 < cols) {
+                        grid[i][j].setNorthEast(grid[i-1][j+1]);
+                    }
+                }
+                if (i+1 < rows){
+                    grid[i][j].setSouth(grid[i+1][j]);
+                    if (j-1 >= 0) {
+                        grid[i][j].setSouthWest(grid[i+1][j-1]);
+                    }
+                    if(j+1 < cols){
+                        grid[i][j].setSouthEast(grid[i+1][j+1]);
+                    }
+                }
+                
+                if (j-1 >= 0){
+                    grid[i][j].setWest(grid[i][j-1]);
+                }
+                
+                if (j + 1 < cols) {
+                    grid[i][j].setEast(grid[i][j+1]);
+                }
+                
+ 
+                
             }
         }
 
