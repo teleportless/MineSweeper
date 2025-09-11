@@ -1,147 +1,226 @@
-import java.awt.Color;
+import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.*;
-import javax.swing.JButton;
 
-public class Grid extends JButton {
+public class Computer extends Game {
 
-    //Attributes
-    private int nearbyMines = 0;
-    private boolean isRevealed = false;
-    private boolean isFlagged = false;
-    private boolean isMine = false;
-    private Color originalColor;
-    private int x;
-    private int y;
-    private int probability = 0;
-    private boolean guessMines;
-
-    //Neighbors
-    private Grid North = null;
-    private Grid East = null;
-    private Grid NorthWest = null;
-    private Grid SouthEast = null;
-    private Grid NorthEast = null;
-    private Grid South = null;
-    private Grid West = null;
-    private Grid SouthWest = null;
-
-    //Getters
-    public Grid getSouth(){
-        return South;
-    }
-    public Grid getNorth(){
-        return North;
-    }
-    public Grid getEast(){
-        return East;
-    }
-    public Grid getNorthWest(){
-        return NorthWest;
-    }
-    public Grid getSouthEast(){
-        return SouthEast;
-    }
-    public Grid getNorthEast(){
-        return NorthEast;
-    }
-    public Grid getWest(){
-        return West;
-    }
-    public Grid getSouthWest(){
-        return SouthWest;
-    }
-    public List<Grid> getCardinalDirections(){
-        return Arrays.asList(this.South, this.North, this.East, this.West, this.NorthEast, this.SouthWest, this.NorthWest, this.SouthEast);
-    }
-    public int getNearbyMines() {
-        return nearbyMines;
-    }
-    public boolean isRevealed() {
-        return isRevealed;
-    }
-    public boolean isFlagged() {
-        return isFlagged;
-    }
-    public boolean isMine() {
-        return isMine;
-    }
-    public int getXCoord(){
-        return x;
-    }
-    public int getYCoord(){
-        return y;
-    }
-    public int getProbability(){
-        return this.probability;
-    }
-    public boolean getGuessMines(){
-        return this.guessMines;
-    }
-
-    //Setters
-    public void setNorth(Grid north){
-        this.North = north;
-    }
-    public void setEast(Grid east){
-        this.East = east;
-    }
-    public void setNorthWest(Grid northWest){
-        this.NorthWest = northWest;
-    }
-    public void setSouthEast(Grid SouthEast){
-        this.SouthEast = SouthEast;
-    }
-    public void setNorthEast(Grid NorthEast){
-        this.NorthEast = NorthEast;
-    }
-    public void setSouth(Grid south){
-        this.South = south;
-    }
-    public void setWest(Grid west){
-        this.West = west;
-    }
-    public void setSouthWest(Grid SouthWest){
-        this.SouthWest = SouthWest;
+    public void findBombs(){
+        for (int row = 0; row < rows; row++){
+            for(int col = 0; col < cols; col++){
+                if (grid[row][col].isRevealed()) {
+                    findBomb(row, col);
+                }
+            }
+        }
     }
     
-    public void setNearbyMines(int nearbyMines) {
-        this.nearbyMines = nearbyMines;
+    private void findBomb(int x, int y){
+        int iMin = Math.max(0, x - 1);
+        int iMax = Math.min(rows - 1, x + 1);
+        int jMin = Math.max(0, y - 1);
+        int jMax = Math.min(cols - 1, y + 1);
+        int unclearedTiles = 0;
+            for (int i = iMin; i <= iMax; i++) {
+                for (int j = jMin; j <= jMax; j++) {
+                    if (!grid[i][j].isRevealed()){
+                        unclearedTiles++;
+                    }
+                }
+            }
+            if (grid[x][y].getNearbyMines() == unclearedTiles){
+                for (int i = iMin; i <= iMax; i++) {
+                    for (int j = jMin; j <= jMax; j++) {
+                        if (!grid[i][j].isRevealed() && !grid[i][j].isFlagged()){
+                            grid[i][j].setFlagged();
+                            grid[i][j].setBackground(Color.BLUE);
+                            totalFlags--;
+                        }
+                    }
+                }
+                
+            }
     }
-    public void setRevealed() {
-        this.isRevealed = true;
-    }
-    public void setFlagged() {
-        this.isFlagged = !this.isFlagged;
-    }
-    public void setMine() {
-        this.isMine = true;
-    }
-    public void setColor(Color color){
-        this.originalColor = color;
-        this.setBackground(this.originalColor);
-    }
-    public void setOriginalColor(){
-        this.setBackground(this.originalColor);
-    }
-    public void setXCoord(int x){
-        this.x = x;
-    }
-    public void setYCoord(int y){
-        this.y = y;
-    }
-    public void setProbability(int probability){
-        this.probability = probability;
-    }
-    public void setGuessMines(){
-        this.guessMines = true;
-    }
-
     
+    public void clearTiles(){
+        for (int row = 0; row < rows; row++){
+            for(int col = 0; col < cols; col++){
+                if (grid[row][col].isRevealed()) {
+                    clearTile(row, col);
+                }
+            }
+        }
+    }
+    
+    private void clearTile(int x, int y){
+        int iMin = Math.max(0, x - 1);
+        int iMax = Math.min(rows - 1, x + 1);
+        int jMin = Math.max(0, y - 1);
+        int jMax = Math.min(cols - 1, y + 1);
+        int minesFlagged = 0;
+        int unclearedTiles = 0;
+        for (int i = iMin; i <= iMax; i++) {
+            for(int j = jMin; j <= jMax; j++) {
+                if (!grid[i][j].isRevealed()){
+                    unclearedTiles++;
+                }
+                if (grid[i][j].isFlagged()) {
+                    minesFlagged++;
+                }
+            }
+        }
+        if (minesFlagged == grid[x][y].getNearbyMines() && unclearedTiles > grid[x][y].getNearbyMines()) {
+            for (int i = iMin; i <= iMax; i++) {
+                for(int j = jMin; j <= jMax; j++) {
+                    if (!grid[i][j].isRevealed() && !grid[i][j].isFlagged()) {
+                        removeTile(i, j);
+                    }
+                }
+            }
+        }
+    }
 
-    public void reset() {
-        this.nearbyMines = 0;
-        this.isRevealed = false;
-        this.isFlagged = false;
-        this.isMine = false;
+    public void setTheories(){
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                setTheory(row, col);
+            }
+        }
+    }
+
+    private void setTheory(int row, int col){
+        if (grid[row][col].isRevealed() && grid[row][col].getNearbyMines() != 0) {
+            int localMineOriginal = grid[row][col].getNearbyMines();
+
+            ArrayList<Grid> possiblePair = new ArrayList<Grid>();
+
+            ArrayList<Grid> originalGroup = new ArrayList<Grid>();
+
+            for (Grid directions : grid[row][col].getCardinalDirections()) {
+                if (directions != null) {
+                    if (!directions.isRevealed() && !directions.isFlagged()){
+                        originalGroup.add(directions);
+                    }
+                    if (directions.isRevealed() && directions.getNearbyMines() != 0){
+                        possiblePair.add(directions);
+                    }
+                }
+                if (directions != null && directions.isFlagged()){
+                    localMineOriginal--;
+                }
+            }
+
+            if (originalGroup.isEmpty() || possiblePair.isEmpty() || originalGroup.isEmpty()){
+                return;
+            }
+
+            // possiblePair is now in scope here
+            for (int i = 0; i < possiblePair.size(); i++){
+                ArrayList<Grid> pairGroup = new ArrayList<Grid>();
+                int localMinePair = possiblePair.get(i).getNearbyMines();
+
+                ArrayList<Grid> originalExclusiveGroup = new ArrayList<Grid>();
+                ArrayList<Grid> pairExclusiveGroup = new ArrayList<Grid>();
+                
+                for (Grid directions : possiblePair.get(i).getCardinalDirections()) {
+                    if (directions != null && !directions.isRevealed() && !directions.isFlagged()) {
+                        pairGroup.add(directions);
+                        if (!originalGroup.contains(directions)){
+                            pairExclusiveGroup.add(directions);
+                        }
+                    }
+                    if (directions != null && directions.isFlagged()){
+                        localMinePair--;
+                    }
+                }
+
+                for (Grid oUnrevealed : originalGroup){
+                    if (!pairGroup.contains(oUnrevealed)){
+                        originalExclusiveGroup.add(oUnrevealed);
+                    }
+                }
+                
+                if (localMineOriginal > localMinePair){
+                    if (localMineOriginal - localMinePair == originalExclusiveGroup.size() && !originalExclusiveGroup.isEmpty()) {
+                        for (Grid revealThis : pairExclusiveGroup){
+                            removeTile(revealThis.getXCoord(), revealThis.getYCoord());
+                        }
+                        for (Grid flagThat : originalExclusiveGroup){
+                            if (!flagThat.isFlagged()) {
+                            flagThat.setFlagged();
+                            flagThat.setBackground(Color.PINK);
+                            totalFlags--;
+                            }
+                        }
+                    }
+                }
+                else if (localMineOriginal < localMinePair) {
+                    if (localMinePair - localMineOriginal == pairExclusiveGroup.size() && !pairExclusiveGroup.isEmpty()) {
+                        for (Grid revealThis : originalExclusiveGroup){
+                            removeTile(revealThis.getXCoord(), revealThis.getYCoord());
+                        }
+                        for (Grid flagThat : pairExclusiveGroup){
+                            if (!flagThat.isFlagged()) {
+                                flagThat.setFlagged();
+                                flagThat.setBackground(Color.PINK);
+                                totalFlags--;
+                            }
+                        }
+                    }
+                }
+
+            }
+        
+        }
+    }
+    private boolean isNextToNumberedTile(Grid tile){
+        for (Grid directions : tile.getCardinalDirections()) {
+            if (directions != null && directions.isRevealed() && directions.getNearbyMines() != 0){
+                return true;
+            }
+        }
+        return false;
+    }
+    private ArrayList edgeTiles(){
+        ArrayList<Grid> edgeTiles = new ArrayList<Grid>();
+        for(int i = 0; i < rows; i++){
+            for (int j = 0; j < cols; j++){
+                if (!grid[i][j].isRevealed()){
+                    for (Grid directions : grid[i][j].getCardinalDirections()) {
+                        if (directions != null && directions.isRevealed()){
+                            edgeTiles.add(grid[i][j]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        int i = edgeTiles.get(0).getX();
+        int j = edgeTiles.get(0).getY();
+        while (true) {
+            if (!grid[i][j].getEast().isRevealed() && !grid[i][j].getEast().isFlagged() && isNextToNumberedTile(grid[i][j].getEast())) {
+                edgeTiles.add(grid[i][j].getEast());
+                j++;
+            } else if (true) {
+                
+            } else if (true) {
+                
+            } else if (true) {
+                
+            } else if (true) {
+                
+            } else if (true) {
+                
+            } else if (true) {
+                
+            } else if (true) {
+                
+            } else if (i + 1 == rows || j + 1 == cols || i - 1 < 0 || j - 1 < 0) {
+                break;
+            }
+        }
+        return edgeTiles;
+    }
+    private void probability(ArrayList<Grid> edgeTiles){
+        
     }
 }
